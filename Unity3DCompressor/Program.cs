@@ -22,14 +22,14 @@ namespace Unity3DCompressor
 
             bool processedFile = false;
 
-            foreach (string path in args)
+            foreach(string path in args)
             {
-                if (File.Exists(path) && FileIsAssetBundle(path))
+                if(File.Exists(path) && FileIsAssetBundle(path))
                 {
                     sb.Append(ProcessFile(path));
                     processedFile = true;
                 }
-                else if (Directory.Exists(path))
+                else if(Directory.Exists(path))
                 {
                     var allfiles = Directory.GetFiles(path, "*", SearchOption.AllDirectories).Where(FileIsAssetBundle);
                     foreach(var x in allfiles)
@@ -40,7 +40,7 @@ namespace Unity3DCompressor
                 }
             }
 
-            if (processedFile)
+            if(processedFile)
             {
                 Console.WriteLine("Press any key to generate output.txt");
                 Console.ReadKey();
@@ -67,7 +67,7 @@ namespace Unity3DCompressor
             sb.AppendLine($"unityParser4 = OpenUnity3d(path=\"{path}\")");
             sb.AppendLine("unityEditor4 = Unity3dEditor(parser=unityParser4)");
             sb.AppendLine("unityEditor4.GetAssetNames(filter=True)");
-            if (CABRandomization)
+            if(CABRandomization)
                 sb.AppendLine($"unityEditor4.RenameCabinet(cabinetIndex=0, name=\"{CAB}\")");
             sb.AppendLine("unityEditor4.SaveUnity3d(keepBackup=False, backupExtension=\".unit-y3d\", background=False, clearMainAsset=True, pathIDsMode=-1, compressionLevel=2, compressionBufferSize=262144)");
             sb.AppendLine();

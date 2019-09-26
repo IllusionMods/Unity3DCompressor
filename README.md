@@ -1,4 +1,4 @@
-# Unity assetbundle compression script creator
+# Unity assetbundle compression script generator
 
 This program will generate scripts for use in SB3Utility that will compress unity3d files.
 Compressed unity3d files will function just as normal except take up less space on disk.

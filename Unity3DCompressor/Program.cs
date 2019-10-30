@@ -76,6 +76,9 @@ namespace Unity3DCompressor
 
         private static bool FileIsAssetBundle(string path)
         {
+            if(Path.GetExtension(path) == ".unity3d")
+                return true;
+
             byte[] buffer = new byte[7];
             using(FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
             {

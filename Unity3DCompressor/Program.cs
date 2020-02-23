@@ -66,6 +66,7 @@ namespace Unity3DCompressor
             sb.AppendLine($"Log(\"Compressing: {path}\")");
             sb.AppendLine($"unityParser4 = OpenUnity3d(path=\"{path}\")");
             sb.AppendLine("unityEditor4 = Unity3dEditor(parser=unityParser4)");
+            // GetAssetNames does more than the name suggests, needs to stay
             sb.AppendLine("unityEditor4.GetAssetNames(filter=True)");
             if(CABRandomization)
                 sb.AppendLine($"unityEditor4.RenameCabinet(cabinetIndex=0, name=\"{CAB}\")");

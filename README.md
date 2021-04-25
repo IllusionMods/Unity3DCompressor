@@ -1,4 +1,4 @@
-# Unity assetbundle compression script generator
+# Unity asset bundle compressor
 
 This program will compress Unity asset bundles with LZ4 compression, saving disk space and improving load times. To use this program, drag a folder or a unity3d file on to the .exe
 

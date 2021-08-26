@@ -10,19 +10,36 @@ namespace Unity3DCompressor
 {
     internal class Program
     {
-        //Change this to true and recompile to randomize CAB-strings of all asset bundles (i.e. for mods).
-        //Randomizing CAB-strings of game asset bundles can break their dependecies, only use this if you know what you're doing.
-        private static readonly bool CABRandomization = false;
+        //Randomizing CAB-strings of game asset bundles can break their dependencies, only use this if you know what you're doing.
+        private static bool CABRandomization = false;
+
         private static readonly RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
 
         private static void Main(string[] args)
         {
+            var switches = args.Where(x => x.StartsWith("--")).ToArray();
+            args = args.Except(switches).ToArray();
+
             if (args.Length == 0)
             {
                 Console.WriteLine($"Drag and drop Unity asset bundles or folders containing asset bundles on to this .exe to compress them.");
+                Console.WriteLine($"Use '--randomizeCAB' switch to randomize CAB strings of compressed bundles. Do not use on game bundles or other bundles with dependencies.");
                 Console.WriteLine($"Press any key to exit.");
                 Console.ReadKey();
                 return;
+            }
+
+            foreach (var switchStr in switches)
+            {
+                switch (switchStr.ToLowerInvariant())
+                {
+                    case "--randomizecab":
+                        CABRandomization = true;
+                        break;
+                    default:
+                        Console.WriteLine("Ignoring unknown switch: " + switchStr);
+                        break;
+                }
             }
 
             foreach (string path in args)
@@ -38,6 +55,10 @@ namespace Unity3DCompressor
                     {
                         CompressFile(x);
                     }
+                }
+                else
+                {
+                    Console.WriteLine("Skipping invalid path: " + path);
                 }
             }
 
@@ -68,9 +89,9 @@ namespace Unity3DCompressor
 
                 File.Move(file + ".temp", file, true);
             }
-            catch
+            catch (Exception ex)
             {
-                Console.WriteLine($"Error compressing, skipping");
+                Console.WriteLine($"Error compressing, skipping ({ex.Message})");
                 return false;
             }
             return true;

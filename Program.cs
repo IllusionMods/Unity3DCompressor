@@ -10,6 +10,9 @@ namespace Unity3DCompressor
 {
     internal class Program
     {
+        //Randomizing CAB-strings of game asset bundles can break their dependencies, only use this if you know what you're doing.
+        private static bool CABRandomization = false;
+
         private static bool Verbose = false;
 
         private static readonly RandomNumberGenerator rng = RandomNumberGenerator.Create();
@@ -32,6 +35,9 @@ namespace Unity3DCompressor
             {
                 switch (switchStr.ToLowerInvariant())
                 {
+                    case "--randomizecab":
+                        CABRandomization = true;
+                        break;
                     case "--verbose":
                         Verbose = true;
                         break;
@@ -82,6 +88,9 @@ namespace Unity3DCompressor
                 Console.WriteLine($"Skipping {file}, not an asset bundle.");
                 return false;
             }
+
+            if (CABRandomization)
+                RandomizeCAB(file);
 
             try
             {

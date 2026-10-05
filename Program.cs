@@ -13,7 +13,9 @@ namespace Unity3DCompressor
         //Randomizing CAB-strings of game asset bundles can break their dependencies, only use this if you know what you're doing.
         private static bool CABRandomization = false;
 
-        private static readonly RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
+        private static bool Verbose = false;
+
+        private static readonly RandomNumberGenerator rng = RandomNumberGenerator.Create();
 
         private static void Main(string[] args)
         {
@@ -25,7 +27,7 @@ namespace Unity3DCompressor
                 Console.WriteLine($"Drag and drop Unity asset bundles or folders containing asset bundles on to this .exe to compress them.");
                 Console.WriteLine($"Use '--randomizeCAB' switch to randomize CAB strings of compressed bundles. Do not use on game bundles or other bundles with dependencies.");
                 Console.WriteLine($"Press any key to exit.");
-                Console.ReadKey();
+                WaitForKey();
                 return;
             }
 
@@ -35,6 +37,9 @@ namespace Unity3DCompressor
                 {
                     case "--randomizecab":
                         CABRandomization = true;
+                        break;
+                    case "--verbose":
+                        Verbose = true;
                         break;
                     default:
                         Console.WriteLine("Ignoring unknown switch: " + switchStr);
@@ -63,7 +68,17 @@ namespace Unity3DCompressor
             }
 
             Console.Write($"Finished compressing asset bundles. Press any key to exit.");
-            Console.ReadKey();
+            WaitForKey();
+        }
+
+        /// <summary>
+        /// Wait for a keypress when running in an interactive terminal.
+        /// Console.ReadKey throws if stdin is redirected (e.g. when launched from a script or file manager), so skip it.
+        /// </summary>
+        private static void WaitForKey()
+        {
+            if (!Console.IsInputRedirected)
+                Console.ReadKey();
         }
 
         public static bool CompressFile(string file)
@@ -83,15 +98,31 @@ namespace Unity3DCompressor
 
                 var assetsManager = new AssetsManager();
                 var bundle = assetsManager.LoadBundleFile(file);
-                using (var stream = File.OpenWrite(file + ".temp"))
-                using (var writer = new AssetsFileWriter(stream))
-                    bundle.file.Pack(bundle.file.reader, writer, AssetBundleCompressionType.LZ4);
 
-                File.Move(file + ".temp", file, true);
+                // LZMA bundles are unpacked on load, LZ4 blocks are decoded on the fly,
+                // so DataReader always exposes the plain serialized data here.
+                string temp = file + ".temp";
+                try
+                {
+                    using (var stream = new FileStream(temp, FileMode.Create, FileAccess.Write, FileShare.None))
+                    using (var writer = new AssetsFileWriter(stream))
+                        bundle.file.Pack(writer, AssetBundleCompressionType.LZ4);
+
+                    assetsManager.UnloadAllBundleFiles();
+                    File.Move(temp, file, true);
+                }
+                catch
+                {
+                    if (File.Exists(temp))
+                        File.Delete(temp);
+                    throw;
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error compressing, skipping ({ex.Message})");
+                if (Verbose)
+                    Console.WriteLine(ex);
                 return false;
             }
             return true;

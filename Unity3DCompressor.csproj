@@ -2,15 +2,18 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    
-    <Version>1.1</Version>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>Unity3DCompressor</AssemblyName>
+    <RootNamespace>Unity3DCompressor</RootNamespace>
+    <InvariantGlobalization>true</InvariantGlobalization>
+
+    <Version>1.2</Version>
   </PropertyGroup>
 
+  <!-- The DLL pinned in lib/ is AssetsTools.NET 2.0.0 (2020), which only understands bundle
+       format versions 3/6/7. 3.x is required for UnityFS v8 bundles (Unity 6+). -->
   <ItemGroup>
-    <Reference Include="AssetsTools.NET">
-      <HintPath>lib\AssetsTools.NET.dll</HintPath>
-    </Reference>
+    <PackageReference Include="AssetsTools.NET" Version="3.0.5" />
   </ItemGroup>
 
 </Project>
